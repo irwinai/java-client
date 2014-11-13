@@ -2,6 +2,7 @@ package com.coinport.payment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.binary.Base64;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -25,21 +26,20 @@ public class Coinport {
         return this;
     }
 
-    public Coinport setC(String currency) {
+    public Coinport setCurrency(String currency) {
+        if (currency.length() > 3) {
+            throw new IllegalArgumentException("Must be a valid currency code");
+        }
         this.currency = currency;
         return this;
     }
 
-    public Invoice createInvoice(double price) {
-        if (currency.length() > 3) {
-            throw new IllegalArgumentException("Must be a valid currency code");
-        }
-
+    public Invoice createInvoice(Map<String, String> paramsMap) {
         String url = BASE_URL + "invoice";
 
         // call API
         String auth = apiToken + ": ";
-        String json = post(url, auth, getParams(price, this.currency));
+        String json = post(url, auth, paramsMap);
 
         // parse invoice
         Invoice invoice = null;
@@ -50,6 +50,19 @@ public class Coinport {
         }
 
         return invoice;
+    }
+
+    public Invoice createInvoice(double price, InvoiceParams params) {
+        Map<String, String> map = params.getParams();
+        map.putAll(getParams(price, this.currency));
+
+        return createInvoice(map);
+    }
+
+    public Invoice createInvoice(double price) {
+        Map<String, String> map = getParams(price, this.currency);
+
+        return createInvoice(map);
     }
 
     public Invoice getInvoice(String invoiceId) {
@@ -116,9 +129,7 @@ public class Coinport {
         } catch (Exception e) {
             System.out.println("发送POST请求异常:" + e);
             e.printStackTrace();
-        }
-
-        finally {
+        } finally {
             try {
                 if (out != null) {
                     out.close();
@@ -187,6 +198,16 @@ public class Coinport {
         // 查询已有的收款请求
         Invoice invoice2 = coinport.getInvoice(invoice.getId());
         System.out.println("get invoice: " + invoice2.toString());
+
+        InvoiceParams params = new InvoiceParams();
+
+        params.setBuyerName("Tom");
+        params.setBuyerEmail("tom@gmail.com");
+        params.setFullNotifications(true);
+        params.setNotificationEmail("tom@gmail.com");
+
+        Invoice invoice3 = coinport.createInvoice(45.88, params);
+        System.out.println("create invoice with params: " + invoice3.toString());
     }
 }
 

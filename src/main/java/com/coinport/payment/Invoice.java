@@ -170,6 +170,8 @@ public class Invoice {
 
     @Override
     public String toString() {
-        return getId() + ", " + getUrl() + ", " + getStatus() + ", " + getPrice() + ", " + getCurrency() + ", " + getBtcPrice() + ", " + getInvoiceTime() + ", " + getExpirationTime() + ", " + getCurrentTime() + ", " + getPostData();
+        String str = getId() + ", " + getUrl() + ", " + getStatus() + ", " + getPrice() + ", " + getCurrency() + ", " + getBtcPrice() + ", " + getInvoiceTime() + ", " + getExpirationTime() + ", " + getCurrentTime() + ", " + getPostData();
+        str = str + "\nmerchant: " + getMerchantName();
+        return str;
     }
 }
